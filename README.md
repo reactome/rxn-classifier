@@ -14,9 +14,11 @@ The Reaction Classifier is based on the following paper published in 2011 in the
 Jupe,S., Jassal,B., Williams,M., Wu,G. A controlled vocabulary for pathway entities and events. Database (2014) Vol. 2014
 
 #####DOI:
+
 [https://doi.org/10.1093/database/bau060](https://doi.org/10.1093/database/bau060)
 
 #####Abstract:
+
 Entities involved in pathways and the events they participate in require descriptive and unambiguous names that are
 often not available in the literature or elsewhere. Reactome is a manually curated open-source resource of human 
 pathways. It is accessible via a website, available as downloads in standard reusable formats and via Representational 
