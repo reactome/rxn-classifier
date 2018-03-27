@@ -1,0 +1,8 @@
+# intelliJ idea git ignore
+*.iml
+.idea
+
+logs/*.log
+reports/*.csv
+
+target/*
