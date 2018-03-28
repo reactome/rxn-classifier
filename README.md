@@ -1,14 +1,14 @@
 [<img src=https://user-images.githubusercontent.com/6883670/31999264-976dfb86-b98a-11e7-9432-0316345a72ea.png height=75 />](https://reactome.org)
 
-# Reactome Reaction Classifier
+# Reaction Classifier
 
-## What is the Reactome Reaction Classifier Module
+## What is the Reaction Classifier Module
 
 The Reaction Classifier generates a series of reports to help curators in the task of classifying the reactions in Reactome. 
 
 ### Reaction Classifier bases 
 
-The Reaction Classifier is based on the following paper published in 2011 in the Database journal by Jupe et al.
+The classifier is based on the following paper published in 2011 in the Database journal by Jupe et al.
 
 #### A controlled vocabulary for pathway entities and events
 Jupe,S., Jassal,B., Williams,M., Wu,G. A controlled vocabulary for pathway entities and events. Database (2014) Vol. 2014
