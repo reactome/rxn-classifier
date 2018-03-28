@@ -31,6 +31,7 @@ public class Main {
     private static Boolean VERBOSE;
 
     private static GeneralService genericService;
+    private static AdvancedDatabaseObjectService ados;
     private static List<Class<?>> sortedClassifiers;
     private static String path;
 
@@ -107,21 +108,18 @@ public class Main {
         //Printing the reports sorted by name
         System.out.println(String.format("\n\n· Report%s:", reports.size() > 1 ? "s" : ""));
         reports.stream().sorted().forEach(Report::printColoured);
+
+        long total = getTotalReactions();
+        long target = getTargetedReactions();
+        long classified = AbstractClassifier.classifications.keySet().size();
+        System.out.println(String.format(
+                "\n· Summary:\n\tTotal: %,d reactions\n\tTarget: %,d reactions (BBE without catalyst activity are excluded).\n\tClassified: %,d reactions\n\tPercentages: %2.0f%% of the target | %2.0f%% of the total",
+                total, target, classified, classified / (double) target * 100d, classified / (double) total * 100d)
+        );
+
         long c = reports.stream().filter(r -> r.count > 0).count();
         System.out.println(String.format("\nReaction Classifier finished. %s classifier%s generated reports (%s)", c, c == 1 ? "" : "s", getTimeFormatted(time)));
 
-        try {
-            AdvancedDatabaseObjectService ados = ReactomeGraphCore.getService(AdvancedDatabaseObjectService.class);
-            String query = "" +
-                    "MATCH (rle:ReactionLikeEvent) " +
-                    "WHERE NOT (rle:BlackBoxEvent) OR (rle)-[:catalystActivity]->() " +
-                    "RETURN COUNT(DISTINCT rle)";
-            int rles = ados.customNumbernQueryResult(query, Collections.emptyMap()).intValue();
-            int t = AbstractClassifier.classifications.keySet().size();
-            System.out.println(String.format("%,d reactions have been classified from a total of %,d", t, rles));
-        } catch (CustomQueryException e) {
-            e.printStackTrace();
-        }
     }
 
     private static void storeReports(String path, String fileName, List<Report> reports) {
@@ -137,6 +135,29 @@ public class Main {
         }
     }
 
+    private static int getTargetedReactions(){
+        try {
+            String query = "" +
+                    "MATCH (rle:ReactionLikeEvent) " +
+                    "WHERE NOT (rle:BlackBoxEvent) OR (rle)-[:catalystActivity]->() " +
+                    "RETURN COUNT(DISTINCT rle)";
+            return ados.customNumbernQueryResult(query, Collections.emptyMap()).intValue();
+        } catch (CustomQueryException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    private static int getTotalReactions(){
+        try {
+            String query = "MATCH (rle:ReactionLikeEvent) RETURN COUNT(DISTINCT rle)";
+            return ados.customNumbernQueryResult(query, Collections.emptyMap()).intValue();
+        } catch (CustomQueryException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     private static void initialise(JSAPResult config) {
         VERBOSE = config.getBoolean("verbose");
 
@@ -150,6 +171,7 @@ public class Main {
         );
         //ReactomeGraphCore has to be initialised before services can be instantiated
         genericService = ReactomeGraphCore.getService(GeneralService.class);
+        ados = ReactomeGraphCore.getService(AdvancedDatabaseObjectService.class);
 
         Reflections reflections = new Reflections(AbstractClassifier.class.getPackage().getName());
         Set<Class<?>> tests = reflections.getTypesAnnotatedWith(RxnClassifier.class);
