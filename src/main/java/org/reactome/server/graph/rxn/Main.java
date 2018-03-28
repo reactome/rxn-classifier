@@ -113,7 +113,7 @@ public class Main {
         long target = getTargetedReactions();
         long classified = AbstractClassifier.classifications.keySet().size();
         System.out.println(String.format(
-                "\n· Summary:\n\tTotal: %,d reactions\n\tTarget: %,d reactions (BBE without catalyst activity are excluded).\n\tClassified: %,d reactions\n\tPercentages: %2.0f%% of the target | %2.0f%% of the total",
+                "\n· Summary:\n\tTotal: %,d reactions\n\tTarget: %,d reactions (BBE without catalyst activity are excluded)\n\tClassified: %,d reactions\n\tPercentages: %2.0f%% of the target | %2.0f%% of the total",
                 total, target, classified, classified / (double) target * 100d, classified / (double) total * 100d)
         );
 
