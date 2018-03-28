@@ -41,8 +41,7 @@ public class Translocation extends AbstractClassifier {
     String getQuery() {
         return " MATCH (ci:Compartment)<-[:compartment]-(i:PhysicalEntity)<-[ri:input]-(rle:ReactionLikeEvent), " +
                 "      (rle)-[ro:output]->(o:PhysicalEntity)-[:compartment]->(co:Compartment) " +
-                "WHERE NOT(rle:BlackBoxEvent) " +
-                "      AND NOT (rle)-[:catalystActivity]->() " +
+                "WHERE NOT(rle:BlackBoxEvent) AND NOT (rle)-[:catalystActivity]->() " +
                 "WITH DISTINCT rle, COLLECT(i) AS is, COLLECT(DISTINCT ri) AS ris, COLLECT(o) AS os, COLLECT(DISTINCT ro) AS ros, " +
                 "     COLLECT(i.schemaClass) AS isc, COLLECT(o.schemaClass) AS osc, COLLECT(ci) AS cis, COLLECT(co) AS cos " +
                 "WITH rle, isc, osc, cis, cos, REDUCE(n=0, e IN ris | n + e.stoichiometry) AS inputs, REDUCE(n=0, e IN ros | n + e.stoichiometry) AS outputs " +

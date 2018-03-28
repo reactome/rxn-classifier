@@ -35,7 +35,7 @@ public class Binding extends AbstractClassifier {
     @Override
     String getQuery() {
         return " MATCH (i:PhysicalEntity)<-[ri:input]-(rle:ReactionLikeEvent)-[ro:output]->(o:PhysicalEntity) " +
-                "WHERE NOT(rle:BlackBoxEvent) " +
+                "WHERE NOT(rle:BlackBoxEvent) AND NOT (rle)-[:catalystActivity]->() " +
                 "WITH DISTINCT rle, COLLECT(i) AS is, COLLECT(DISTINCT ri) AS ris, COLLECT(o) AS os, COLLECT(DISTINCT ro) AS ros " +
                 "WITH rle, REDUCE(n=0, e IN ris | n + e.stoichiometry) AS inputs, REDUCE(n=0, e IN ros | n + e.stoichiometry) AS outputs " +
                 "WHERE ANY(pe IN is WHERE (rle)-[:output]-(:Complex)-[:hasComponent]->(pe)) " +
