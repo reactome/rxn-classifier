@@ -22,7 +22,7 @@ public class Activation extends AbstractClassifier {
 
     @Override
     List<String> getHeader() {
-        return Arrays.asList("Identifier", "Reaction", "Inputs", "Outputs", "Created", "Modified");
+        return Arrays.asList("Identifier", "Reaction", "Created", "Modified");
     }
 
     @Override

@@ -74,7 +74,7 @@ public class MolecularCatalyst extends AbstractClassifier {
                 if(attribute.equals("Type")){
                     String translate = gomfTranslation.get(aux);
                     aux = (translate == null || translate.isEmpty()) ? "GO:" + aux : StringUtils.capitalize(translate);
-                    classifications.add(stId, aux);
+                    classified.add(stId, aux);
                 }
                 line.add(String.format("\"%s\"", aux));
             }
@@ -89,7 +89,8 @@ public class MolecularCatalyst extends AbstractClassifier {
         return " MATCH (rle:ReactionLikeEvent)-[:catalystActivity]->(:CatalystActivity)-[:activity]->(go:GO_MolecularFunction) " +
                 "OPTIONAL MATCH (a)-[:created]->(rle) " +
                 "OPTIONAL MATCH (m)-[:modified]->(rle) " +
-                "RETURN rle.stId AS Identifier, rle.displayName AS Reaction, go.accession AS Type, a.displayName AS Created, m.displayName AS Modified";
+                "RETURN rle.stId AS Identifier, rle.displayName AS Reaction, go.accession AS Type, a.displayName AS Created, m.displayName AS Modified " +
+                "ORDER BY Created, Modified, Identifier";
     }
 
 }

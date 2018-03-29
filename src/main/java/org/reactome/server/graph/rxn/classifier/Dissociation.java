@@ -23,7 +23,7 @@ public class Dissociation extends AbstractClassifier {
 
     @Override
     List<String> getHeader() {
-        return Arrays.asList("Identifier", "Reaction", "Inputs", "Outputs", "Created", "Modified");
+        return Arrays.asList("Identifier", "Reaction", "Created", "Modified");
     }
 
     @Override
@@ -40,7 +40,7 @@ public class Dissociation extends AbstractClassifier {
                 "WHERE ANY(pe IN os WHERE (rle)-[:input]-(:Complex)-[:hasComponent]->(pe)) " +
                 "OPTIONAL MATCH (a)-[:created]->(rle) " +
                 "OPTIONAL MATCH (m)-[:modified]->(rle) " +
-                "RETURN DISTINCT rle.stId AS Identifier, rle.displayName AS Reaction, inputs AS Inputs, outputs AS Outputs, a.displayName AS Created, m.displayName AS Modified " +
+                "RETURN DISTINCT rle.stId AS Identifier, rle.displayName AS Reaction, a.displayName AS Created, m.displayName AS Modified " +
                 "ORDER BY Created, Modified, Identifier";
     }
 }
