@@ -113,12 +113,11 @@ public class Main {
         reports.stream().sorted().forEach(Report::printColoured);
 
         long total = getTotalReactions();
-        long target = getTargetedReactions();
         long classified = AbstractClassifier.classified.keySet().size();
         long unclassified = AbstractClassifier.unclassified.size();
         System.out.println(String.format(
-                "\n· Summary:\n\tTotal: %,d reactions\n\tTarget: %,d reactions (BBE without catalyst activity are excluded)\n\tClassified: %,d reactions\n\tUnclassified: %,d reactions\n\tPercentages: %2.0f%% of the target | %2.0f%% of the total",
-                total, target, classified, unclassified, classified / (double) target * 100d, classified / (double) total * 100d)
+                "\n· Summary:\n\tTotal: %,d reactions\n\tClassified: %,d reactions (%2.0f%%) \n\tUnclassified: %,d reactions (%2.0f%%)",
+                total, classified, classified / (double) total * 100d, unclassified, unclassified / (double) total * 100d)
         );
 
         long c = reports.stream().filter(r -> r.count > 0).count();
