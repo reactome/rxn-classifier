@@ -36,7 +36,7 @@ public class Unclassified extends AbstractClassifier {
     @Override
     String getQuery() {
         return " MATCH (rle:ReactionLikeEvent) " +
-                "WHERE NOT(rle:BlackBoxEvent) AND NOT (rle)-[:catalystActivity]->() AND NOT rle.stId IN {classified} " +
+                "WHERE NOT rle.stId IN {classified} " +
                 "OPTIONAL MATCH (a)-[:created]->(rle) " +
                 "OPTIONAL MATCH (m)-[:modified]->(rle) " +
                 "RETURN DISTINCT rle.stId AS Identifier, rle.displayName AS Reaction, a.displayName AS Created, m.displayName AS Modified " +
