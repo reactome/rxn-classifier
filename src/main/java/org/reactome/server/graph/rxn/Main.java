@@ -2,13 +2,16 @@
 package org.reactome.server.graph.rxn;
 
 import com.martiansoftware.jsap.*;
+import org.apache.commons.lang3.StringUtils;
 import org.reactome.server.graph.exception.CustomQueryException;
 import org.reactome.server.graph.rxn.classifier.AbstractClassifier;
 import org.reactome.server.graph.rxn.common.Classifier;
 import org.reactome.server.graph.rxn.common.RxnClassifier;
+import org.reactome.server.graph.rxn.common.RxnPostClassifier;
 import org.reactome.server.graph.rxn.config.ReactomeNeo4jConfig;
 import org.reactome.server.graph.rxn.utils.FileUtils;
 import org.reactome.server.graph.rxn.utils.ProgressBar;
+import org.reactome.server.graph.rxn.utils.ReactionDetails;
 import org.reactome.server.graph.rxn.utils.Report;
 import org.reactome.server.graph.service.AdvancedDatabaseObjectService;
 import org.reactome.server.graph.service.GeneralService;
@@ -56,7 +59,7 @@ public class Main {
         final Long start = System.currentTimeMillis();
         String classifier = config.getString("classifier").toLowerCase();
         List<Report> reports = classifier.equals("all") ? runAllClassifiers() : runSingleClassifier(classifier);
-        AbstractClassifier.reportClassifications(path, "Classifier_Aggregation_v" + genericService.getDBVersion());
+        reportAggregatedClassifications(path, "Classifier_Aggregation_v" + genericService.getDBVersion());
         //Reports have to be stored and printed in the screen (when VERBOSE)
         storeReports(path, "Classifier_Summary_v" + genericService.getDBVersion(), reports);
         final Long time = System.currentTimeMillis() - start;
@@ -111,15 +114,46 @@ public class Main {
 
         long total = getTotalReactions();
         long target = getTargetedReactions();
-        long classified = AbstractClassifier.classifications.keySet().size();
+        long classified = AbstractClassifier.classified.keySet().size();
+        long unclassified = AbstractClassifier.unclassified.size();
         System.out.println(String.format(
-                "\n· Summary:\n\tTotal: %,d reactions\n\tTarget: %,d reactions (BBE without catalyst activity are excluded)\n\tClassified: %,d reactions\n\tPercentages: %2.0f%% of the target | %2.0f%% of the total",
-                total, target, classified, classified / (double) target * 100d, classified / (double) total * 100d)
+                "\n· Summary:\n\tTotal: %,d reactions\n\tTarget: %,d reactions (BBE without catalyst activity are excluded)\n\tClassified: %,d reactions\n\tUnclassified: %,d reactions\n\tPercentages: %2.0f%% of the target | %2.0f%% of the total",
+                total, target, classified, unclassified, classified / (double) target * 100d, classified / (double) total * 100d)
         );
 
         long c = reports.stream().filter(r -> r.count > 0).count();
         System.out.println(String.format("\nReaction Classifier finished. %s classifier%s generated reports (%s)", c, c == 1 ? "" : "s", getTimeFormatted(time)));
 
+    }
+
+    private static void reportAggregatedClassifications(String path, String name){
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put("target", AbstractClassifier.classified.keySet());
+            String query = "MATCH (rle:ReactionLikeEvent) " +
+                    "WHERE rle.stId IN {target} " +
+                    "OPTIONAL MATCH (a)-[:created]->(rle) " +
+                    "OPTIONAL MATCH (m)-[:modified]->(rle) " +
+                    "RETURN rle.stId AS identifier, rle.displayName AS name, a.displayName AS created, m.displayName AS modified " +
+                    "ORDER BY created, modified";
+            Collection<ReactionDetails> targets = ados.customQueryForObjects(ReactionDetails.class, query, params);
+
+            if (targets.isEmpty()) return;
+            List<String> lines = new ArrayList<>();
+            lines.add("Identifier,Name,#Types,Types,Created,Modified");
+            for (ReactionDetails target : targets) {
+                Set<String> aux = AbstractClassifier.classified.get(target.getIdentifier());
+                lines.add(String.format("%s,\"%s\",%d,\"%s\",\"%s\",\"%s\"",
+                        target.getIdentifier(), target.getName(),
+                        aux.size(), StringUtils.join(aux, " | "),
+                        target.getCreated(), target.getModified()
+                ));
+            }
+
+            Files.write(FileUtils.getFilePath(path, name), lines, Charset.forName("UTF-8"));
+        } catch (CustomQueryException | IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void storeReports(String path, String fileName, List<Report> reports) {
@@ -178,6 +212,10 @@ public class Main {
         sortedClassifiers = tests.stream().filter(c -> c.getAnnotation(Deprecated.class) == null)
                 .sorted(Comparator.comparing(Class::getSimpleName)) // Sorting tests by name
                 .collect(Collectors.toList());
+        tests = reflections.getTypesAnnotatedWith(RxnPostClassifier.class);
+        sortedClassifiers.addAll(tests.stream().filter(c -> c.getAnnotation(Deprecated.class) == null)
+                .sorted(Comparator.comparing(Class::getSimpleName)) // Sorting tests by name
+                .collect(Collectors.toList()));
 
         if (VERBOSE) {  //Report test initialisation
             System.out.println("· Reaction Classifier initialisation:");
