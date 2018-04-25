@@ -135,7 +135,7 @@ public class Main {
                     "OPTIONAL MATCH (m)-[:modified]->(rle) " +
                     "RETURN rle.stId AS identifier, rle.displayName AS name, a.displayName AS created, m.displayName AS modified " +
                     "ORDER BY created, modified";
-            Collection<ReactionDetails> targets = ados.customQueryForObjects(ReactionDetails.class, query, params);
+            Collection<ReactionDetails> targets = ados.getCustomQueryResults(ReactionDetails.class, query, params);
 
             if (targets.isEmpty()) return;
             List<String> lines = new ArrayList<>();
@@ -174,7 +174,7 @@ public class Main {
                     "MATCH (rle:ReactionLikeEvent) " +
                     "WHERE NOT (rle:BlackBoxEvent) OR (rle)-[:catalystActivity]->() " +
                     "RETURN COUNT(DISTINCT rle)";
-            return ados.customNumbernQueryResult(query, Collections.emptyMap()).intValue();
+            return ados.getCustomQueryResult(Integer.class, query, Collections.emptyMap());
         } catch (CustomQueryException e) {
             e.printStackTrace();
         }
@@ -184,7 +184,7 @@ public class Main {
     private static int getTotalReactions(){
         try {
             String query = "MATCH (rle:ReactionLikeEvent) RETURN COUNT(DISTINCT rle)";
-            return ados.customNumbernQueryResult(query, Collections.emptyMap()).intValue();
+            return ados.getCustomQueryResult(Integer.class, query, Collections.emptyMap());
         } catch (CustomQueryException e) {
             e.printStackTrace();
         }
