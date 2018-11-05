@@ -59,9 +59,10 @@ public class Main {
         final Long start = System.currentTimeMillis();
         String classifier = config.getString("classifier").toLowerCase();
         List<Report> reports = classifier.equals("all") ? runAllClassifiers() : runSingleClassifier(classifier);
-        reportAggregatedClassifications(path, "Classifier_Aggregation_v" + genericService.getDBVersion());
+        Integer version = genericService.getDBInfo().getVersion();
+        reportAggregatedClassifications(path, "Classifier_Aggregation_v" + version);
         //Reports have to be stored and printed in the screen (when VERBOSE)
-        storeReports(path, "Classifier_Summary_v" + genericService.getDBVersion(), reports);
+        storeReports(path, "Classifier_Summary_v" + version, reports);
         final Long time = System.currentTimeMillis() - start;
 
         printReports(reports, time);
